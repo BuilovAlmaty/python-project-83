@@ -1,0 +1,115 @@
+# ===========================
+# Python
+# ===========================
+
+# Byte-compiled / cached / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+pip-wheel-metadata/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environment
+venv/
+.env/
+env/
+ENV/
+.venv/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.cache
+nosetests.xml
+pytest.xml
+.testmondata
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Static type checkers
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# ===========================
+# PyCharm / JetBrains IDE
+# ===========================
+
+# Project settings
+.idea/
+
+# Crash logs
+idea.log
+
+# File-based project format
+*.iws
+
+# JetBrains caches
+# (папки .idea/**/ используются только разработчиком и не нужны в репозитории)
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# Data source local storage
+.idea/**/dataSources/
+.idea/**/dataSources.local.xml
+
+# Non-versioned files
+.idea/**/misc.xml
+.idea/**/modules.xml
+.idea/**/vcs.xml
+
+# Editor-specific settings
+.idea/**/deployment.xml
+.idea/**/webServers.xml
+
+# Python plugin specific
+.idea/**/pythonSettings.xml
+
+# Linux
+*~
+
+# ===========================
+# Logs & temp
+# ===========================
+
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
