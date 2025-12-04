@@ -8,6 +8,6 @@ start:
 lint:
 	uv run ruff check .
 build:
-	./build.sh
+	build.sh
 render-start:
 	gunicorn -w 5 -b 127.0.0.1:$(PORT) page_analyzer:app
