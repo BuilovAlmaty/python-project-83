@@ -30,6 +30,7 @@ pip-wheel-metadata/
 .installed.cfg
 *.egg
 MANIFEST
+.python-version
 
 # Virtual environment
 venv/
