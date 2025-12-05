@@ -8,4 +8,4 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 @app.get("/")
 def home():
-    return render_template("home1.html")
+    return render_template("home.html")
