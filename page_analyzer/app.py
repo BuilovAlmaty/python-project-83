@@ -97,14 +97,17 @@ class RepoUrls():
                 cur.execute("DELETE FROM urls WHERE urls.id=%s", (int(id),))
                 conn.commit()
 
+
 @app.get("/")
 def home_get():
     messages = get_flashed_messages(with_categories=True)
     return render_template('home.html', messages=messages)
 
+
 @app.post("/")
 def home_post():
     return render_template('home.html')
+
 
 @app.post("/urls")
 def url_post():
@@ -120,8 +123,9 @@ def url_post():
             flash("Страница уже существует", category="info")
         form = redirect(url_for('url_get', id=url_id))
         return form
-    flash("Страница некорректна", category="error")
+    flash("Некорректный URL", category="error")
     return redirect(url_for('home_get'))
+
 
 @app.get("/urls/<int:id>")
 def url_get(id):
@@ -133,6 +137,7 @@ def url_get(id):
         messages=messages,
         url=url
     )
+
 
 @app.get("/urls")
 def urls_get():
