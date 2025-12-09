@@ -1,14 +1,12 @@
+PORT ?= 8000
 install:
 	uv sync
 
 dev:
-	uv run flask --debug --app page_analyzer:app run
+	uv run flask --debug --app page_analyzer:app run --host=127.0.0.1 --port=$(PORT)
 
 build:
 	./build.sh
-
-PORT ?= 8000
-
 start:
 	uv run gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
 
