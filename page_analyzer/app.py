@@ -44,7 +44,23 @@ class Url:
         self.__dict__[key] = value
 
 
-class RepoUrls():
+class UrlCheck:
+    def __init__(self, url):
+        self.url = url
+        self.status_code = 200
+        self.h1 = ""
+        self.title = ""
+        self.description = ""
+        self.created_at = datetime.now()
+
+    def make_check(self):
+        self.status_code = 200
+        self.h1 = "1"
+        self.title = "1"
+        self.description = "1"
+
+
+class BaseRepo:
     def __init__(self, pool):
         self.pool = pool
 
@@ -56,6 +72,8 @@ class RepoUrls():
         finally:
             self.pool.putconn(conn)
 
+
+class RepoUrls(BaseRepo):
     def get_url_id_by_name(self, url_name):
         with self._get_conn() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -98,15 +116,67 @@ class RepoUrls():
                 conn.commit()
 
 
+class RepoUrlChecks(BaseRepo):
+    def get_checks_by_id(self, url_id):
+        with self._get_conn() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                query = '''
+                    SELECT
+                        c.id id,
+                        c.status_code status_code,
+                        c.h1 h1,
+                        c.title title,
+                        c.description description,
+                        c.created_at
+                    FROM url_checks AS c
+                    WHERE c.url_id = %s
+                    ORDER BY c.id DESC;
+                '''
+                cur.execute(query, (int(url_id),))
+                return cur.fetchall()
+
+    def get_last_checks(self):
+        with self._get_conn() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                query = '''
+                    SELECT
+                        u.id id,
+                        u.name name,
+                        MAX(c.created_at) created_at,
+                        c.status_code status_code
+                    FROM url_checks AS c
+                    LEFT JOIN urls AS u
+                        ON c.url_id = u.id
+                    GROUP BY u.id, u.name, c.status_code
+                    ORDER BY u.id DESC;
+                '''
+                cur.execute(query)
+                return cur.fetchall()
+
+    def add_url_check(self, url_check):
+        with self._get_conn() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                query = '''
+                    INSERT INTO url_checks
+                        (url_id, status_code, h1, title, description, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s);
+                '''
+                cur.execute(
+                    query,
+                    (url_check.url.id,
+                     url_check.status_code,
+                     url_check.h1,
+                     url_check.title,
+                     url_check.description,
+                     url_check.created_at)
+                )
+                conn.commit()
+
+
 @app.get("/")
 def home_get():
     messages = get_flashed_messages(with_categories=True)
     return render_template('home.html', messages=messages)
-
-
-@app.post("/")
-def home_post():
-    return render_template('home.html')
 
 
 @app.post("/urls")
@@ -121,8 +191,7 @@ def url_post():
             flash("Страница успешно добавлена", category="success")
         else:
             flash("Страница уже существует", category="info")
-        form = redirect(url_for('url_get', id=url_id))
-        return form
+        return redirect(url_for('url_get', id=url_id))
     flash("Некорректный URL", category="error")
     return redirect(url_for('home_get'))
 
@@ -130,22 +199,35 @@ def url_post():
 @app.get("/urls/<int:id>")
 def url_get(id):
     messages = get_flashed_messages(with_categories=True)
-    repo = RepoUrls(psql_pool)
-    url = repo.get_url_by_id(id)
+    repo_url = RepoUrls(psql_pool)
+    url = repo_url.get_url_by_id(id)
+    repo_check = RepoUrlChecks(psql_pool)
+    checks = repo_check.get_checks_by_id(id)
     return render_template(
         'new_url.html',
         messages=messages,
-        url=url
+        url=url,
+        checks=checks
     )
 
 
 @app.get("/urls")
 def urls_get():
     messages = get_flashed_messages(with_categories=True)
-    repo = RepoUrls(psql_pool)
-    urls = repo.get_urls()
+    repo = RepoUrlChecks(psql_pool)
+    checks = repo.get_last_checks()
     return render_template(
         'urls.html',
         messages=messages,
-        urls=urls
+        checks=checks
     )
+
+
+@app.post("/urls/<int:id>/checks")
+def checks_post(id):
+    repo = RepoUrlChecks(psql_pool)
+    url_check = UrlCheck(Url({"id": id}))
+    url_check.make_check()
+    repo.add_url_check(url_check)
+    flash("Проверка успешно добавлена", category="success")
+    return redirect(url_for('url_get', id=url_check.url.id))
