@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, url_for, get_flashed_messages
 from dotenv import load_dotenv
 from urllib.parse import urlparse
 import os
+import requests
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
 from psycopg2 import pool
@@ -37,9 +38,6 @@ class Url:
             return False
         return True
 
-    def get_text(self):
-        return self.name
-
     def set_value(self, key, value):
         self.__dict__[key] = value
 
@@ -47,17 +45,22 @@ class Url:
 class UrlCheck:
     def __init__(self, url):
         self.url = url
-        self.status_code = 200
-        self.h1 = ""
-        self.title = ""
-        self.description = ""
-        self.created_at = datetime.now()
-
-    def make_check(self):
-        self.status_code = 200
         self.h1 = "1"
         self.title = "1"
         self.description = "1"
+        self.created_at = datetime.now()
+
+    def make_check(self):
+        try:
+            request = requests.get(self.url.name)
+            request.raise_for_status()
+            self.set_value("status_code", request.status_code)
+            self.set_value("ok", request.ok)
+        except requests.exceptions.HTTPError as e:
+            self.set_value("error", f"Ошибка запроса: {e}")
+
+    def set_value(self, key, value):
+        self.__dict__[key] = value
 
 
 class BaseRepo:
@@ -225,9 +228,12 @@ def urls_get():
 
 @app.post("/urls/<int:id>/checks")
 def checks_post(id):
-    repo = RepoUrlChecks(psql_pool)
-    url_check = UrlCheck(Url({"id": id}))
+    repo_checks = RepoUrlChecks(psql_pool)
+    repo_urls = RepoUrls(psql_pool)
+    url = repo_urls.get_url_by_id(id)
+    url_check = UrlCheck(url)
     url_check.make_check()
-    repo.add_url_check(url_check)
-    flash("Проверка успешно добавлена", category="success")
-    return redirect(url_for('url_get', id=url_check.url.id))
+    if url_check.ok:
+        repo_checks.add_url_check(url_check)
+        flash("Проверка успешно добавлена", category="success")
+    return redirect(url_for('url_get', id=url.id))
