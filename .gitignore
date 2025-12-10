@@ -115,3 +115,4 @@ idea.log
 *.temp
 *.swp
 *.swo
+run.py

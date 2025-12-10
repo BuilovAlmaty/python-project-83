@@ -1,19 +1,18 @@
 from flask import Flask, render_template, request, url_for, get_flashed_messages, flash, redirect
 from dotenv import load_dotenv
 from urllib.parse import urlparse
-import os
-import requests
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
 from psycopg2 import pool
 from contextlib import contextmanager
+import os
+import requests
+from bs4 import BeautifulSoup
 
 
 load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-if __name__ == "__main__":
-    app.run()
 
 
 psql_pool = pool.SimpleConnectionPool(
@@ -23,9 +22,7 @@ psql_pool = pool.SimpleConnectionPool(
 
 class Url:
     def __init__(self, dict):
-        self.id = dict.get('id', None)
-        self.name = dict.get('name', "")
-        self.created_at = dict.get('created_at', None)
+        self.__dict__.update(dict)
 
     def is_valid(self):
         try:
@@ -34,7 +31,7 @@ class Url:
                 return False
             if not parsed.netloc:
                 return False
-        except:
+        except Exception:
             return False
         return True
 
@@ -45,19 +42,31 @@ class Url:
 class UrlCheck:
     def __init__(self, url):
         self.url = url
-        self.h1 = "1"
-        self.title = "1"
-        self.description = "1"
-        self.created_at = datetime.now()
 
     def make_check(self):
+        req = requests.get(self.url.name, timeout=5)
         try:
-            request = requests.get(self.url.name)
-            request.raise_for_status()
-            self.set_value("status_code", request.status_code)
-            self.set_value("ok", request.ok)
+            req.raise_for_status()
         except requests.exceptions.HTTPError as e:
+            self.set_value("ok", False)
             self.set_value("error", f"Ошибка запроса: {e}")
+            return
+        self.set_value("status_code", req.status_code)
+        self.set_value("ok", req.ok)
+        self.set_value("created_at", datetime.now())
+
+        bs = BeautifulSoup(req.text, "html.parser")
+        h1 = bs.find("h1")
+        self.set_value("h1", h1.text if h1 else "")
+        title = bs.find("title")
+        self.set_value("title", title.text if title else "")
+        meta = bs.find('meta',  attrs={"name": "description"})
+        if meta and meta.get("content"):
+            description = meta["content"]
+        else:
+            description = ""
+        self.set_value("description", description)
+
 
     def set_value(self, key, value):
         self.__dict__[key] = value
@@ -146,11 +155,11 @@ class RepoUrlChecks(BaseRepo):
                         u.id id,
                         u.name name,
                         MAX(c.created_at) created_at,
-                        c.status_code status_code
+                        MIN(c.status_code) status_code
                     FROM url_checks AS c
                     LEFT JOIN urls AS u
                         ON c.url_id = u.id
-                    GROUP BY u.id, u.name, c.status_code
+                    GROUP BY u.id, u.name
                     ORDER BY u.id DESC;
                 '''
                 cur.execute(query)

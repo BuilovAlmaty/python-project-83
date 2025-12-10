@@ -1,7 +1,7 @@
 [project]
 name = "hexlet-code"
 version = "0.1.0"
-description = "Add your description here"
+description = "This app analizes websites onto SEO suitability"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -9,7 +9,6 @@ dependencies = [
     "flask>=3.1.2",
     "gunicorn>=23.0.0",
     "psycopg2>=2.9.11",
-    "pytest>=9.0.1",
     "requests>=2.32.5",
     "ruff>=0.14.5",
 ]
