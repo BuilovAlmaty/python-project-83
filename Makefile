@@ -1,7 +1,6 @@
 PORT ?= 8000
 install:
 	uv sync
-
 dev:
 	uv run flask --debug --app page_analyzer:app run --host=127.0.0.1 --port=$(PORT)
 
