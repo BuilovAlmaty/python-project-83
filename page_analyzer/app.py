@@ -205,7 +205,7 @@ def url_post():
             flash("Страница уже существует", category="info")
         return redirect(url_for('url_get', id=url_id))
     flash("Некорректный URL", category="error")
-    return redirect(url_for('home_get')), 422
+    return render_template('home.html'), 422
 
 
 @app.get("/urls/<int:id>")
