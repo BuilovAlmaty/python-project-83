@@ -155,8 +155,8 @@ class RepoUrlChecks(BaseRepo):
                         u.name name,
                         MAX(c.created_at) created_at,
                         MIN(c.status_code) status_code
-                    FROM url_checks AS c
-                    LEFT JOIN urls AS u
+                    FROM urls AS u
+                    LEFT JOIN url_checks AS c
                         ON c.url_id = u.id
                     GROUP BY u.id, u.name
                     ORDER BY u.id DESC;
