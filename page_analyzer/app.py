@@ -244,5 +244,7 @@ def checks_post(id):
     url_check.make_check()
     if url_check.ok:
         repo_checks.add_url_check(url_check)
-        flash("Проверка успешно добавлена", category="success")
+        flash("Страница успешно проверена", category="success")
+    else:
+        flash("Произошла ошибка при проверке", category="error")
     return redirect(url_for('url_get', id=url.id))
