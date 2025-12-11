@@ -186,8 +186,7 @@ class RepoUrlChecks(BaseRepo):
 
 @app.get("/")
 def home_get():
-    messages = get_flashed_messages(with_categories=True)
-    return render_template('home.html', messages=messages)
+    return render_template('home.html')
 
 
 @app.post("/urls")
@@ -210,14 +209,12 @@ def url_post():
 
 @app.get("/urls/<int:id>")
 def url_get(id):
-    messages = get_flashed_messages(with_categories=True)
     repo_url = RepoUrls(psql_pool)
     url = repo_url.get_url_by_id(id)
     repo_check = RepoUrlChecks(psql_pool)
     checks = repo_check.get_checks_by_id(id)
     return render_template(
         'new_url.html',
-        messages=messages,
         url=url,
         checks=checks
     )
@@ -225,12 +222,10 @@ def url_get(id):
 
 @app.get("/urls")
 def urls_get():
-    messages = get_flashed_messages(with_categories=True)
     repo = RepoUrlChecks(psql_pool)
     checks = repo.get_last_checks()
     return render_template(
         'urls.html',
-        messages=messages,
         checks=checks
     )
 

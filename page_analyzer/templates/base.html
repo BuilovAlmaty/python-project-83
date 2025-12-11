@@ -17,17 +17,19 @@
         </div>
     </nav>
 </header>
-{% if messages %}
-    {% for category, message in messages %}
-        {% set message_type = {
-              'error': 'danger',
-              'success': 'success',
-              'info': 'info',
-              'warning': 'warning'
-        }[category] %}
-        <div class="alert alert-{{ message_type }}" role="alert">{{ message }}</div>
-    {% endfor %}
-{% endif %}
+{% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            {% set message_type = {
+                  'error': 'danger',
+                  'success': 'success',
+                  'info': 'info',
+                  'warning': 'warning'
+            }[category] %}
+            <div class="alert alert-{{ message_type }}" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
 <main class="flex-grow-1">
     <div class="container-lg mt-3">
         {% block content %}
