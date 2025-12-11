@@ -25,14 +25,21 @@ class Url:
 
     def is_valid(self):
         try:
-            parsed = urlparse(self.name)
-            if parsed.scheme not in ('http', 'https'):
+            if self.scheme not in ('http', 'https'):
                 return False
-            if not parsed.netloc:
+            if not self.netloc:
                 return False
         except Exception:
             return False
         return True
+
+    def parse(self):
+        if self.text:
+            parsed = urlparse(self.text)
+
+            self.set_value("scheme", parsed.scheme)
+            self.set_value("netloc", parsed.netloc)
+            self.set_value("name", f'{parsed.scheme}://{parsed.netloc}')
 
     def set_value(self, key, value):
         self.__dict__[key] = value
@@ -65,7 +72,6 @@ class UrlCheck:
         else:
             description = ""
         self.set_value("description", description)
-
 
     def set_value(self, key, value):
         self.__dict__[key] = value
@@ -113,18 +119,12 @@ class RepoUrls(BaseRepo):
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 now = datetime.now()
                 cur.execute(
-                    "INSERT INTO urls (name, created_at) VALUES (%s, %s) RETURNING id;",
-                    (url.name, now,)
+                    "INSERT INTO urls (name, text, created_at) VALUES (%s, %s, %s) RETURNING id;",
+                    (url.name, url.text, now,)
                 )
                 new_url = Url(cur.fetchone())
                 conn.commit()
                 return new_url
-
-    def del_url(self, id):
-        with self._get_conn() as conn:
-            with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute("DELETE FROM urls WHERE urls.id=%s", (int(id),))
-                conn.commit()
 
 
 class RepoUrlChecks(BaseRepo):
@@ -192,7 +192,8 @@ def home_get():
 
 @app.post("/urls")
 def url_post():
-    url = Url({'name': request.form.get("url")})
+    url = Url({'text': request.form.get("url")})
+    url.parse()
     if url.is_valid():
         repo = RepoUrls(psql_pool)
         url_id = repo.get_url_id_by_name(url.name)
@@ -204,7 +205,7 @@ def url_post():
             flash("Страница уже существует", category="info")
         return redirect(url_for('url_get', id=url_id))
     flash("Некорректный URL", category="error")
-    return redirect(url_for('home_get'))
+    return redirect(url_for('home_get'), 422)
 
 
 @app.get("/urls/<int:id>")
