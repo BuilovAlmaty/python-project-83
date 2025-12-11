@@ -50,10 +50,10 @@ class UrlCheck:
         self.url = url
 
     def make_check(self):
-        req = requests.get(self.url.name, timeout=5)
         try:
+            req = requests.get(self.url.name, timeout=5)
             req.raise_for_status()
-        except requests.exceptions.HTTPError as e:
+        except Exception as e:
             self.set_value("ok", False)
             self.set_value("error", f"Ошибка запроса: {e}")
             return
@@ -205,7 +205,7 @@ def url_post():
             flash("Страница уже существует", category="info")
         return redirect(url_for('url_get', id=url_id))
     flash("Некорректный URL", category="error")
-    return redirect(url_for('home_get'), 422)
+    return redirect(url_for('home_get')), 422
 
 
 @app.get("/urls/<int:id>")
