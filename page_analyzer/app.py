@@ -66,7 +66,7 @@ class UrlCheck:
         self.set_value("h1", h1.text if h1 else "")
         title = bs.find("title")
         self.set_value("title", title.text if title else "")
-        meta = bs.find('meta',  attrs={"name": "description"})
+        meta = bs.find('meta', attrs={"name": "description"})
         if meta and meta.get("content"):
             description = meta["content"]
         else:
