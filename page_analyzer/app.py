@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, get_flashed_messages, flash, redirect
+from flask import Flask, render_template, request, url_for, flash, redirect
 from dotenv import load_dotenv
 from urllib.parse import urlparse
 from psycopg2.extras import RealDictCursor
@@ -94,7 +94,10 @@ class RepoUrls(BaseRepo):
     def get_url_id_by_name(self, url_name):
         with self._get_conn() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute("SELECT id FROM urls WHERE urls.name=%s;", (url_name,))
+                cur.execute(
+                    "SELECT id FROM urls WHERE urls.name=%s;",
+                    (url_name,)
+                )
                 row = cur.fetchone()
                 if row:
                     return row.get('id', None)
@@ -102,7 +105,10 @@ class RepoUrls(BaseRepo):
     def get_url_by_id(self, id):
         with self._get_conn() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute("SELECT * FROM urls WHERE urls.id=%s", (int(id),))
+                cur.execute(
+                    "SELECT * FROM urls WHERE urls.id=%s",
+                    (int(id),)
+                )
                 row = cur.fetchone()
                 if row:
                     return Url(row)
@@ -111,7 +117,16 @@ class RepoUrls(BaseRepo):
     def get_urls(self):
         with self._get_conn() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute("SELECT id, name, created_at FROM urls ORDER BY urls.created_at DESC")
+                cur.execute(
+                    '''
+                    SELECT 
+                        id, 
+                        name, 
+                        created_at 
+                    FROM urls 
+                    ORDER BY urls.created_at DESC;
+                    '''
+                )
                 return cur.fetchall()
 
     def add_url(self, url):
@@ -119,7 +134,11 @@ class RepoUrls(BaseRepo):
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 now = datetime.now()
                 cur.execute(
-                    "INSERT INTO urls (name, text, created_at) VALUES (%s, %s, %s) RETURNING id;",
+                    '''
+                    INSERT INTO urls 
+                        (name, text, created_at) 
+                    VALUES (%s, %s, %s) RETURNING id;
+                    ''',
                     (url.name, url.text, now,)
                 )
                 new_url = Url(cur.fetchone())
@@ -169,7 +188,13 @@ class RepoUrlChecks(BaseRepo):
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 query = '''
                     INSERT INTO url_checks
-                        (url_id, status_code, h1, title, description, created_at)
+                        (
+                        url_id, 
+                        status_code, 
+                        h1, 
+                        title, 
+                        description, 
+                        created_at)
                     VALUES (%s, %s, %s, %s, %s, %s);
                 '''
                 cur.execute(
