@@ -1,3 +1,53 @@
+# Page Analyzer
+
+Веб-приложение для анализа веб-страниц: проверка доступности страницы и извлечение SEO-параметров (title, h1, description).
+
+Проект написан на Flask, использует PostgreSQL и менеджер зависимостей uv.
+
+## Требования
+
+Перед установкой убедитесь, что у вас установлены:
+
+Python >= 3.12
+
+PostgreSQL >= 13
+
+uv
+```bash
+pip install uv
+```
+
+## Установка
+### Клонирование репозитория
+```bash
+git clone https://github.com/<ваш-username>/python-project-83.git
+cd python-project-83
+```
+### Установка зависимостей
+```bash
+make install
+```
+
+### Настройка переменных окружения
+
+Создайте файл .env в корне проекта:
+```bash
+DATABASE_URL=postgresql://user:password@localhost:5432/page_analyzer
+SECRET_KEY=your_secret_key
+```
+Замените ```user```, ```password``` и имя базы данных на свои значения.
+
+## Запуск приложения
+### Запуск 
+```bash
+make start
+```
+### Запуск в режиме разработки
+```bash
+make dev
+```
+
+
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/BuilovAlmaty/python-project-83/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/BuilovAlmaty/python-project-83/actions)
 

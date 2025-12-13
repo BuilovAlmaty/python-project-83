@@ -13,3 +13,5 @@ render-start:
 	gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
 kill:
 	@PT=$(PT); for pid in $$(lsof -ti :$${PT:-8000}); do echo "kill pin: $$pid"; kill -9 "$$pid"; done
+lint:
+	uv run ruff check .
